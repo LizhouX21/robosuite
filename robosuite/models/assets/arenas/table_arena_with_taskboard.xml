@@ -1,0 +1,611 @@
+<mujoco model="table_arena">
+  <option noslip_iterations="20">
+    <flag multiccd="enable"/>
+  </option>
+  <visual>
+    <scale framelength="0.1" framewidth="0.001"/>
+  </visual>
+  <asset>
+    <texture builtin="gradient" height="256" rgb1=".9 .9 1." rgb2=".2 .3 .4" type="skybox" width="256"/>
+    <texture file="../textures/wood-tiles.png" type="2d" name="texplane"/>
+    <material name="floorplane" reflectance="0.01" shininess="0.0" specular="0.0" texrepeat="2 2" texture="texplane" texuniform="true"/>
+    <!-- ceramic table texture and material-->
+    <texture file="../textures/ceramic.png" type="cube" name="tex-ceramic"/>
+    <material name="table_ceramic" reflectance="0.0" shininess="0.0" specular="0.2" texrepeat="1 1" texture="tex-ceramic" />
+    <!-- steel legs -->
+    <texture file="../textures/steel-brushed.png" type="cube" name="tex-steel-brushed"/>
+    <material name="table_legs_metal" reflectance="0.8" shininess="0.8" texrepeat="1 1" texture="tex-steel-brushed" />
+    <!-- plaster walls -->
+    <texture file="../textures/cream-plaster.png" type="2d" name="tex-cream-plaster"/>
+    <material name="walls_mat" reflectance="0.0" shininess="0.1" specular="0.1" texrepeat="3 3" texture="tex-cream-plaster" texuniform="true" />
+    <!-- added table texture and material for domain randomization -->
+    <texture  name="textable" builtin="flat" height="512" width="512" rgb1="0.5 0.5 0.5" rgb2="0.5 0.5 0.5"/>
+    <material name="table_mat" texture="textable" />
+
+    <mesh name="taskboard_01_base" file="../objects/meshes/taskboard_01_base.stl" scale="0.001 0.001 0.001" />
+    <mesh name="taskboard_02_plate" file="../objects/meshes/taskboard_02_plate.stl" scale="0.001 0.001 0.001" />
+    <mesh name="07_SBARB6200ZZ_30" file="../objects/meshes/07_SBARB6200ZZ_30.stl" scale="0.001 0.001 0.001" />
+    <mesh name="50_MBGNA30-2" file="../objects/meshes/50_MBGNA30-2.stl" scale="0.001 0.001 0.001" />
+    <mesh name="51_MBGNA60-2" file="../objects/meshes/51_MBGNA60-2.stl" scale="0.001 0.001 0.001" />
+
+  </asset>
+  <worldbody>
+    <!-- Floor -->
+    <geom condim="3" material="floorplane" name="floor" pos="0 0 0" size="3 3 .125" type="plane"/>
+    <!-- Walls (visual only) -->
+    <geom pos="-1.25 2.25 1.5" quat="0.6532815 0.6532815 0.2705981 0.2705981" size="1.06 1.5 0.01" type="box" conaffinity="0" contype="0" group="1" name="wall_leftcorner_visual" material="walls_mat"/>
+    <geom pos="-1.25 -2.25 1.5" quat="0.6532815 0.6532815 -0.2705981 -0.2705981" size="1.06 1.5 0.01" type="box" conaffinity="0" contype="0" group="1" name="wall_rightcorner_visual" material="walls_mat"/>
+    <geom pos="1.25 3 1.5" quat="0.7071 0.7071 0 0" size="1.75 1.5 0.01" type="box" conaffinity="0" contype="0" group="1" name="wall_left_visual" material="walls_mat"/>
+    <geom pos="1.25 -3 1.5" quat="0.7071 -0.7071 0 0" size="1.75 1.5 0.01" type="box" conaffinity="0" contype="0" group="1" name="wall_right_visual" material="walls_mat"/>
+    <geom pos="-2 0 1.5" quat="0.5 0.5 0.5 0.5" size="1.5 1.5 0.01" type="box" conaffinity="0" contype="0" group="1" name="wall_rear_visual" material="walls_mat"/>
+    <geom pos="3 0 1.5" quat="0.5 0.5 -0.5 -0.5" size="3 1.5 0.01" type="box" conaffinity="0" contype="0" group="1" name="wall_front_visual" material="walls_mat"/>
+    <!-- Table body -->
+    <body name="table" pos="0 0 0.4">
+      <geom pos="0 0 0" size="0.4 0.4 0.4" type="box" group="0" name="table_collision" friction="1 0.005 0.0001"/>
+      <geom pos="0 0 0" size="0.4 0.4 0.4" type="box" conaffinity="0" contype="0" group="1" name="table_visual" material="table_ceramic"/>
+      <site pos="0 0 0.4" name="table_top" size="0.001 0.001 0.001" rgba="0 0 0 0"/>
+      <!-- Legs (visual only) -->
+      <geom pos="0 0 0" size="0.05 0.1" type="cylinder" conaffinity="0" contype="0" group="1" name="table_leg1_visual" material="table_legs_metal"/>
+      <geom pos="0 0 0" size="0.05 0.1" type="cylinder" conaffinity="0" contype="0" group="1" name="table_leg2_visual" material="table_legs_metal"/>
+      <geom pos="0 0 0" size="0.05 0.1" type="cylinder" conaffinity="0" contype="0" group="1" name="table_leg3_visual" material="table_legs_metal"/>
+      <geom pos="0 0 0" size="0.05 0.1" type="cylinder" conaffinity="0" contype="0" group="1" name="table_leg4_visual" material="table_legs_metal"/>
+          <!-- taskboard body -->
+        <!-- <body name="taskboard" pos="0 0 0">
+            <site pos="0 0 0.0" name="taskboard_origin" size="0.001 0.001 0.001" rgba="0 0 1 1"/>
+            <geom pos="0.12 0 0.01" quat="0.5 -0.5 -0.5 0.5" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="3000" friction="0.95 0.3 0.1" group="1" rgba="1 0.1 0.1 1" mesh="taskboard_01_base" />
+            <geom pos="0.058 0 0.01" quat="0.5 0.5 0.5 0.5" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="3000" friction="0.95 0.3 0.1" group="1" rgba="1 0.1 0.1 1" mesh="taskboard_02_plate" />
+            <geom size="0.003 0.0125" pos="0.0905 0.099 0.095" quat="0 -0.707107 0 0.707107" type="cylinder" solimp="0.998 0.998 0.001" solref="0.001 1" density="3000" friction="0.95 0.3 0.1" group="1" />
+            <geom pos="0.091 0.165 0.131" quat="0 1 0 0" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="3000" friction="0.95 0.3 0.1" group="1" rgba="0.4 0.9 0.1 1" mesh="07_SBARB6200ZZ_30" />
+            <geom pos="0.095 0.0275 0.043" quat="0 0 0 1" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="3000" friction="0.95 0.3 0.1" group="1" rgba="0.4 0.9 0.1 1" mesh="50_MBGNA30-2" />
+            <geom pos="0.0995 0.1575 0.05" quat="0 0 0 1" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="3000" friction="0.95 0.3 0.1" group="1" rgba="0.4 0.9 0.1 1" mesh="51_MBGNA60-2" />
+        </body> -->
+          <!--taskboard body -->
+    </body>
+
+    <!-- taskboard body -->
+    <body name="taskboard" pos="-0.35 0 0.8">
+        <!-- Site pos is different from WRS manual calculation and URDF from O2AS team-->
+        <site pos="0 0 0" name="taskboard_origin" size="0.001 0.001 0.001" rgba="0 0 1 1"/>
+        <site pos="0.083 0.034 0.130" name="pulley_insertion_center" size="0.001 0.001 0.001" rgba="0 0 1 1"/>
+
+
+        <body name="hollow_cylinder_root" pos="0.0805 0.034 0.130" euler='0 1.57079632679 0'>
+            <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.0372655" diaginertia="2.19244e-05 1.10399e-05 1.10399e-05" />
+            <geom name="hollow_cylinder_hc_0" size="0.00599105 0.000368146 0.0025" pos="-0.0240067 0 0" quat="0 0 0 1" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_0_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0240067 0 0" quat="0 0 0 1" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_1" size="0.00599105 0.000368146 0.0025" pos="-0.0239995 0.000589154 0" quat="0.0122715 0 0 0.999925" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_1_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0239995 0.000589154 0" quat="0.0122715 0 0 0.999925" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_2" size="0.00599105 0.000368146 0.0025" pos="-0.0239778 0.00117795 0" quat="0.0245412 0 0 0.999699" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_2_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0239778 0.00117795 0" quat="0.0245412 0 0 0.999699" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_3" size="0.00599105 0.000368146 0.0025" pos="-0.0239416 0.00176604 0" quat="0.0368072 0 0 0.999322" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_3_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0239416 0.00176604 0" quat="0.0368072 0 0 0.999322" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_4" size="0.00599105 0.000368146 0.0025" pos="-0.0238911 0.00235307 0" quat="0.0490677 0 0 0.998795" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_4_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0238911 0.00235307 0" quat="0.0490677 0 0 0.998795" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_5" size="0.00599105 0.000368146 0.0025" pos="-0.0238262 0.00293868 0" quat="0.0613207 0 0 0.998118" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_5_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0238262 0.00293868 0" quat="0.0613207 0 0 0.998118" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_6" size="0.00599105 0.000368146 0.0025" pos="-0.0237469 0.00352251 0" quat="0.0735646 0 0 0.99729" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_6_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0237469 0.00352251 0" quat="0.0735646 0 0 0.99729" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_7" size="0.00599105 0.000368146 0.0025" pos="-0.0236533 0.00410423 0" quat="0.0857973 0 0 0.996313" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_7_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0236533 0.00410423 0" quat="0.0857973 0 0 0.996313" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_8" size="0.00599105 0.000368146 0.0025" pos="-0.0235454 0.00468347 0" quat="0.0980171 0 0 0.995185" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_8_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0235454 0.00468347 0" quat="0.0980171 0 0 0.995185" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_9" size="0.00599105 0.000368146 0.0025" pos="-0.0234234 0.0052599 0" quat="0.110222 0 0 0.993907" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_9_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0234234 0.0052599 0" quat="0.110222 0 0 0.993907" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_10" size="0.00599105 0.000368146 0.0025" pos="-0.0232872 0.00583315 0" quat="0.122411 0 0 0.99248" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_10_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0232872 0.00583315 0" quat="0.122411 0 0 0.99248" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_11" size="0.00599105 0.000368146 0.0025" pos="-0.0231371 0.00640289 0" quat="0.134581 0 0 0.990903" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_11_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0231371 0.00640289 0" quat="0.134581 0 0 0.990903" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_12" size="0.00599105 0.000368146 0.0025" pos="-0.022973 0.00696877 0" quat="0.14673 0 0 0.989177" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_12_vis" size="0.00599105 0.000368146 0.0025" pos="-0.022973 0.00696877 0" quat="0.14673 0 0 0.989177" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_13" size="0.00599105 0.000368146 0.0025" pos="-0.022795 0.00753046 0" quat="0.158858 0 0 0.987301" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_13_vis" size="0.00599105 0.000368146 0.0025" pos="-0.022795 0.00753046 0" quat="0.158858 0 0 0.987301" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_14" size="0.00599105 0.000368146 0.0025" pos="-0.0226034 0.00808761 0" quat="0.170962 0 0 0.985278" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_14_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0226034 0.00808761 0" quat="0.170962 0 0 0.985278" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_15" size="0.00599105 0.000368146 0.0025" pos="-0.0223981 0.00863989 0" quat="0.18304 0 0 0.983105" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_15_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0223981 0.00863989 0" quat="0.18304 0 0 0.983105" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_16" size="0.00599105 0.000368146 0.0025" pos="-0.0221793 0.00918696 0" quat="0.19509 0 0 0.980785" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_16_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0221793 0.00918696 0" quat="0.19509 0 0 0.980785" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_17" size="0.00599105 0.000368146 0.0025" pos="-0.0219472 0.0097285 0" quat="0.207111 0 0 0.978317" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_17_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0219472 0.0097285 0" quat="0.207111 0 0 0.978317" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_18" size="0.00599105 0.000368146 0.0025" pos="-0.0217018 0.0102642 0" quat="0.219101 0 0 0.975702" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_18_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0217018 0.0102642 0" quat="0.219101 0 0 0.975702" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_19" size="0.00599105 0.000368146 0.0025" pos="-0.0214434 0.0107937 0" quat="0.231058 0 0 0.97294" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_19_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0214434 0.0107937 0" quat="0.231058 0 0 0.97294" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_20" size="0.00599105 0.000368146 0.0025" pos="-0.021172 0.0113167 0" quat="0.24298 0 0 0.970031" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_20_vis" size="0.00599105 0.000368146 0.0025" pos="-0.021172 0.0113167 0" quat="0.24298 0 0 0.970031" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_21" size="0.00599105 0.000368146 0.0025" pos="-0.0208879 0.0118329 0" quat="0.254866 0 0 0.966976" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_21_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0208879 0.0118329 0" quat="0.254866 0 0 0.966976" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_22" size="0.00599105 0.000368146 0.0025" pos="-0.0205912 0.0123419 0" quat="0.266713 0 0 0.963776" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_22_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0205912 0.0123419 0" quat="0.266713 0 0 0.963776" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_23" size="0.00599105 0.000368146 0.0025" pos="-0.0202821 0.0128435 0" quat="0.27852 0 0 0.960431" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_23_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0202821 0.0128435 0" quat="0.27852 0 0 0.960431" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_24" size="0.00599105 0.000368146 0.0025" pos="-0.0199608 0.0133374 0" quat="0.290285 0 0 0.95694" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_24_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0199608 0.0133374 0" quat="0.290285 0 0 0.95694" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_25" size="0.00599105 0.000368146 0.0025" pos="-0.0196275 0.0138233 0" quat="0.302006 0 0 0.953306" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_25_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0196275 0.0138233 0" quat="0.302006 0 0 0.953306" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_26" size="0.00599105 0.000368146 0.0025" pos="-0.0192824 0.0143008 0" quat="0.313682 0 0 0.949528" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_26_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0192824 0.0143008 0" quat="0.313682 0 0 0.949528" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_27" size="0.00599105 0.000368146 0.0025" pos="-0.0189256 0.0147697 0" quat="0.32531 0 0 0.945607" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_27_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0189256 0.0147697 0" quat="0.32531 0 0 0.945607" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_28" size="0.00599105 0.000368146 0.0025" pos="-0.0185574 0.0152297 0" quat="0.33689 0 0 0.941544" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_28_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0185574 0.0152297 0" quat="0.33689 0 0 0.941544" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_29" size="0.00599105 0.000368146 0.0025" pos="-0.0181781 0.0156805 0" quat="0.348419 0 0 0.937339" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_29_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0181781 0.0156805 0" quat="0.348419 0 0 0.937339" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_30" size="0.00599105 0.000368146 0.0025" pos="-0.0177878 0.0161219 0" quat="0.359895 0 0 0.932993" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_30_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0177878 0.0161219 0" quat="0.359895 0 0 0.932993" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_31" size="0.00599105 0.000368146 0.0025" pos="-0.0173868 0.0165536 0" quat="0.371317 0 0 0.928506" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_31_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0173868 0.0165536 0" quat="0.371317 0 0 0.928506" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_32" size="0.00599105 0.000368146 0.0025" pos="-0.0169753 0.0169753 0" quat="0.382683 0 0 0.92388" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_32_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0169753 0.0169753 0" quat="0.382683 0 0 0.92388" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_33" size="0.00599105 0.000368146 0.0025" pos="-0.0165536 0.0173868 0" quat="0.393992 0 0 0.919114" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_33_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0165536 0.0173868 0" quat="0.393992 0 0 0.919114" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_34" size="0.00599105 0.000368146 0.0025" pos="-0.0161219 0.0177878 0" quat="0.405241 0 0 0.91421" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_34_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0161219 0.0177878 0" quat="0.405241 0 0 0.91421" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_35" size="0.00599105 0.000368146 0.0025" pos="-0.0156805 0.0181781 0" quat="0.41643 0 0 0.909168" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_35_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0156805 0.0181781 0" quat="0.41643 0 0 0.909168" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_36" size="0.00599105 0.000368146 0.0025" pos="-0.0152297 0.0185574 0" quat="0.427555 0 0 0.903989" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_36_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0152297 0.0185574 0" quat="0.427555 0 0 0.903989" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_37" size="0.00599105 0.000368146 0.0025" pos="-0.0147697 0.0189256 0" quat="0.438616 0 0 0.898674" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_37_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0147697 0.0189256 0" quat="0.438616 0 0 0.898674" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_38" size="0.00599105 0.000368146 0.0025" pos="-0.0143008 0.0192824 0" quat="0.449611 0 0 0.893224" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_38_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0143008 0.0192824 0" quat="0.449611 0 0 0.893224" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_39" size="0.00599105 0.000368146 0.0025" pos="-0.0138233 0.0196275 0" quat="0.460539 0 0 0.88764" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_39_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0138233 0.0196275 0" quat="0.460539 0 0 0.88764" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_40" size="0.00599105 0.000368146 0.0025" pos="-0.0133374 0.0199608 0" quat="0.471397 0 0 0.881921" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_40_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0133374 0.0199608 0" quat="0.471397 0 0 0.881921" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_41" size="0.00599105 0.000368146 0.0025" pos="-0.0128435 0.0202821 0" quat="0.482184 0 0 0.87607" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_41_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0128435 0.0202821 0" quat="0.482184 0 0 0.87607" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_42" size="0.00599105 0.000368146 0.0025" pos="-0.0123419 0.0205912 0" quat="0.492898 0 0 0.870087" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_42_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0123419 0.0205912 0" quat="0.492898 0 0 0.870087" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_43" size="0.00599105 0.000368146 0.0025" pos="-0.0118329 0.0208879 0" quat="0.503538 0 0 0.863973" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_43_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0118329 0.0208879 0" quat="0.503538 0 0 0.863973" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_44" size="0.00599105 0.000368146 0.0025" pos="-0.0113167 0.021172 0" quat="0.514103 0 0 0.857729" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_44_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0113167 0.021172 0" quat="0.514103 0 0 0.857729" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_45" size="0.00599105 0.000368146 0.0025" pos="-0.0107937 0.0214434 0" quat="0.52459 0 0 0.851355" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_45_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0107937 0.0214434 0" quat="0.52459 0 0 0.851355" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_46" size="0.00599105 0.000368146 0.0025" pos="-0.0102642 0.0217018 0" quat="0.534998 0 0 0.844854" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_46_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0102642 0.0217018 0" quat="0.534998 0 0 0.844854" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_47" size="0.00599105 0.000368146 0.0025" pos="-0.0097285 0.0219472 0" quat="0.545325 0 0 0.838225" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_47_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0097285 0.0219472 0" quat="0.545325 0 0 0.838225" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_48" size="0.00599105 0.000368146 0.0025" pos="-0.00918696 0.0221793 0" quat="0.55557 0 0 0.83147" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_48_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00918696 0.0221793 0" quat="0.55557 0 0 0.83147" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_49" size="0.00599105 0.000368146 0.0025" pos="-0.00863989 0.0223981 0" quat="0.565732 0 0 0.824589" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_49_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00863989 0.0223981 0" quat="0.565732 0 0 0.824589" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_50" size="0.00599105 0.000368146 0.0025" pos="-0.00808761 0.0226034 0" quat="0.575808 0 0 0.817585" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_50_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00808761 0.0226034 0" quat="0.575808 0 0 0.817585" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_51" size="0.00599105 0.000368146 0.0025" pos="-0.00753046 0.022795 0" quat="0.585798 0 0 0.810457" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_51_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00753046 0.022795 0" quat="0.585798 0 0 0.810457" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_52" size="0.00599105 0.000368146 0.0025" pos="-0.00696877 0.022973 0" quat="0.595699 0 0 0.803208" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_52_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00696877 0.022973 0" quat="0.595699 0 0 0.803208" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_53" size="0.00599105 0.000368146 0.0025" pos="-0.00640289 0.0231371 0" quat="0.605511 0 0 0.795837" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_53_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00640289 0.0231371 0" quat="0.605511 0 0 0.795837" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_54" size="0.00599105 0.000368146 0.0025" pos="-0.00583315 0.0232872 0" quat="0.615232 0 0 0.788346" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_54_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00583315 0.0232872 0" quat="0.615232 0 0 0.788346" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_55" size="0.00599105 0.000368146 0.0025" pos="-0.0052599 0.0234234 0" quat="0.624859 0 0 0.780737" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_55_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0052599 0.0234234 0" quat="0.624859 0 0 0.780737" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_56" size="0.00599105 0.000368146 0.0025" pos="-0.00468347 0.0235454 0" quat="0.634393 0 0 0.77301" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_56_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00468347 0.0235454 0" quat="0.634393 0 0 0.77301" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_57" size="0.00599105 0.000368146 0.0025" pos="-0.00410423 0.0236533 0" quat="0.643832 0 0 0.765167" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_57_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00410423 0.0236533 0" quat="0.643832 0 0 0.765167" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_58" size="0.00599105 0.000368146 0.0025" pos="-0.00352251 0.0237469 0" quat="0.653173 0 0 0.757209" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_58_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00352251 0.0237469 0" quat="0.653173 0 0 0.757209" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_59" size="0.00599105 0.000368146 0.0025" pos="-0.00293868 0.0238262 0" quat="0.662416 0 0 0.749136" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_59_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00293868 0.0238262 0" quat="0.662416 0 0 0.749136" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_60" size="0.00599105 0.000368146 0.0025" pos="-0.00235307 0.0238911 0" quat="0.671559 0 0 0.740951" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_60_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00235307 0.0238911 0" quat="0.671559 0 0 0.740951" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_61" size="0.00599105 0.000368146 0.0025" pos="-0.00176604 0.0239416 0" quat="0.680601 0 0 0.732654" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_61_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00176604 0.0239416 0" quat="0.680601 0 0 0.732654" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_62" size="0.00599105 0.000368146 0.0025" pos="-0.00117795 0.0239778 0" quat="0.689541 0 0 0.724247" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_62_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00117795 0.0239778 0" quat="0.689541 0 0 0.724247" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_63" size="0.00599105 0.000368146 0.0025" pos="-0.000589154 0.0239995 0" quat="0.698376 0 0 0.715731" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_63_vis" size="0.00599105 0.000368146 0.0025" pos="-0.000589154 0.0239995 0" quat="0.698376 0 0 0.715731" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_64" size="0.00599105 0.000368146 0.0025" pos="0 0.0240067 0" quat="0.707107 0 0 0.707107" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_64_vis" size="0.00599105 0.000368146 0.0025" pos="0 0.0240067 0" quat="0.707107 0 0 0.707107" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_65" size="0.00599105 0.000368146 0.0025" pos="0.000589154 0.0239995 0" quat="0.715731 0 0 0.698376" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_65_vis" size="0.00599105 0.000368146 0.0025" pos="0.000589154 0.0239995 0" quat="0.715731 0 0 0.698376" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_66" size="0.00599105 0.000368146 0.0025" pos="0.00117795 0.0239778 0" quat="0.724247 0 0 0.689541" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_66_vis" size="0.00599105 0.000368146 0.0025" pos="0.00117795 0.0239778 0" quat="0.724247 0 0 0.689541" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_67" size="0.00599105 0.000368146 0.0025" pos="0.00176604 0.0239416 0" quat="0.732654 0 0 0.680601" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_67_vis" size="0.00599105 0.000368146 0.0025" pos="0.00176604 0.0239416 0" quat="0.732654 0 0 0.680601" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_68" size="0.00599105 0.000368146 0.0025" pos="0.00235307 0.0238911 0" quat="0.740951 0 0 0.671559" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_68_vis" size="0.00599105 0.000368146 0.0025" pos="0.00235307 0.0238911 0" quat="0.740951 0 0 0.671559" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_69" size="0.00599105 0.000368146 0.0025" pos="0.00293868 0.0238262 0" quat="0.749136 0 0 0.662416" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_69_vis" size="0.00599105 0.000368146 0.0025" pos="0.00293868 0.0238262 0" quat="0.749136 0 0 0.662416" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_70" size="0.00599105 0.000368146 0.0025" pos="0.00352251 0.0237469 0" quat="0.757209 0 0 0.653173" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_70_vis" size="0.00599105 0.000368146 0.0025" pos="0.00352251 0.0237469 0" quat="0.757209 0 0 0.653173" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_71" size="0.00599105 0.000368146 0.0025" pos="0.00410423 0.0236533 0" quat="0.765167 0 0 0.643832" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_71_vis" size="0.00599105 0.000368146 0.0025" pos="0.00410423 0.0236533 0" quat="0.765167 0 0 0.643832" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_72" size="0.00599105 0.000368146 0.0025" pos="0.00468347 0.0235454 0" quat="0.77301 0 0 0.634393" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_72_vis" size="0.00599105 0.000368146 0.0025" pos="0.00468347 0.0235454 0" quat="0.77301 0 0 0.634393" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_73" size="0.00599105 0.000368146 0.0025" pos="0.0052599 0.0234234 0" quat="0.780737 0 0 0.624859" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_73_vis" size="0.00599105 0.000368146 0.0025" pos="0.0052599 0.0234234 0" quat="0.780737 0 0 0.624859" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_74" size="0.00599105 0.000368146 0.0025" pos="0.00583315 0.0232872 0" quat="0.788346 0 0 0.615232" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_74_vis" size="0.00599105 0.000368146 0.0025" pos="0.00583315 0.0232872 0" quat="0.788346 0 0 0.615232" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_75" size="0.00599105 0.000368146 0.0025" pos="0.00640289 0.0231371 0" quat="0.795837 0 0 0.605511" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_75_vis" size="0.00599105 0.000368146 0.0025" pos="0.00640289 0.0231371 0" quat="0.795837 0 0 0.605511" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_76" size="0.00599105 0.000368146 0.0025" pos="0.00696877 0.022973 0" quat="0.803208 0 0 0.595699" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_76_vis" size="0.00599105 0.000368146 0.0025" pos="0.00696877 0.022973 0" quat="0.803208 0 0 0.595699" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_77" size="0.00599105 0.000368146 0.0025" pos="0.00753046 0.022795 0" quat="0.810457 0 0 0.585798" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_77_vis" size="0.00599105 0.000368146 0.0025" pos="0.00753046 0.022795 0" quat="0.810457 0 0 0.585798" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_78" size="0.00599105 0.000368146 0.0025" pos="0.00808761 0.0226034 0" quat="0.817585 0 0 0.575808" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_78_vis" size="0.00599105 0.000368146 0.0025" pos="0.00808761 0.0226034 0" quat="0.817585 0 0 0.575808" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_79" size="0.00599105 0.000368146 0.0025" pos="0.00863989 0.0223981 0" quat="0.824589 0 0 0.565732" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_79_vis" size="0.00599105 0.000368146 0.0025" pos="0.00863989 0.0223981 0" quat="0.824589 0 0 0.565732" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_80" size="0.00599105 0.000368146 0.0025" pos="0.00918696 0.0221793 0" quat="0.83147 0 0 0.55557" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_80_vis" size="0.00599105 0.000368146 0.0025" pos="0.00918696 0.0221793 0" quat="0.83147 0 0 0.55557" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_81" size="0.00599105 0.000368146 0.0025" pos="0.0097285 0.0219472 0" quat="0.838225 0 0 0.545325" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_81_vis" size="0.00599105 0.000368146 0.0025" pos="0.0097285 0.0219472 0" quat="0.838225 0 0 0.545325" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_82" size="0.00599105 0.000368146 0.0025" pos="0.0102642 0.0217018 0" quat="0.844854 0 0 0.534998" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_82_vis" size="0.00599105 0.000368146 0.0025" pos="0.0102642 0.0217018 0" quat="0.844854 0 0 0.534998" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_83" size="0.00599105 0.000368146 0.0025" pos="0.0107937 0.0214434 0" quat="0.851355 0 0 0.52459" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_83_vis" size="0.00599105 0.000368146 0.0025" pos="0.0107937 0.0214434 0" quat="0.851355 0 0 0.52459" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_84" size="0.00599105 0.000368146 0.0025" pos="0.0113167 0.021172 0" quat="0.857729 0 0 0.514103" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_84_vis" size="0.00599105 0.000368146 0.0025" pos="0.0113167 0.021172 0" quat="0.857729 0 0 0.514103" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_85" size="0.00599105 0.000368146 0.0025" pos="0.0118329 0.0208879 0" quat="0.863973 0 0 0.503538" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_85_vis" size="0.00599105 0.000368146 0.0025" pos="0.0118329 0.0208879 0" quat="0.863973 0 0 0.503538" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_86" size="0.00599105 0.000368146 0.0025" pos="0.0123419 0.0205912 0" quat="0.870087 0 0 0.492898" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_86_vis" size="0.00599105 0.000368146 0.0025" pos="0.0123419 0.0205912 0" quat="0.870087 0 0 0.492898" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_87" size="0.00599105 0.000368146 0.0025" pos="0.0128435 0.0202821 0" quat="0.87607 0 0 0.482184" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_87_vis" size="0.00599105 0.000368146 0.0025" pos="0.0128435 0.0202821 0" quat="0.87607 0 0 0.482184" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_88" size="0.00599105 0.000368146 0.0025" pos="0.0133374 0.0199608 0" quat="0.881921 0 0 0.471397" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_88_vis" size="0.00599105 0.000368146 0.0025" pos="0.0133374 0.0199608 0" quat="0.881921 0 0 0.471397" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_89" size="0.00599105 0.000368146 0.0025" pos="0.0138233 0.0196275 0" quat="0.88764 0 0 0.460539" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_89_vis" size="0.00599105 0.000368146 0.0025" pos="0.0138233 0.0196275 0" quat="0.88764 0 0 0.460539" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_90" size="0.00599105 0.000368146 0.0025" pos="0.0143008 0.0192824 0" quat="0.893224 0 0 0.449611" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_90_vis" size="0.00599105 0.000368146 0.0025" pos="0.0143008 0.0192824 0" quat="0.893224 0 0 0.449611" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_91" size="0.00599105 0.000368146 0.0025" pos="0.0147697 0.0189256 0" quat="0.898674 0 0 0.438616" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_91_vis" size="0.00599105 0.000368146 0.0025" pos="0.0147697 0.0189256 0" quat="0.898674 0 0 0.438616" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_92" size="0.00599105 0.000368146 0.0025" pos="0.0152297 0.0185574 0" quat="0.903989 0 0 0.427555" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_92_vis" size="0.00599105 0.000368146 0.0025" pos="0.0152297 0.0185574 0" quat="0.903989 0 0 0.427555" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_93" size="0.00599105 0.000368146 0.0025" pos="0.0156805 0.0181781 0" quat="0.909168 0 0 0.41643" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_93_vis" size="0.00599105 0.000368146 0.0025" pos="0.0156805 0.0181781 0" quat="0.909168 0 0 0.41643" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_94" size="0.00599105 0.000368146 0.0025" pos="0.0161219 0.0177878 0" quat="0.91421 0 0 0.405241" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_94_vis" size="0.00599105 0.000368146 0.0025" pos="0.0161219 0.0177878 0" quat="0.91421 0 0 0.405241" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_95" size="0.00599105 0.000368146 0.0025" pos="0.0165536 0.0173868 0" quat="0.919114 0 0 0.393992" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_95_vis" size="0.00599105 0.000368146 0.0025" pos="0.0165536 0.0173868 0" quat="0.919114 0 0 0.393992" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_96" size="0.00599105 0.000368146 0.0025" pos="0.0169753 0.0169753 0" quat="0.92388 0 0 0.382683" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_96_vis" size="0.00599105 0.000368146 0.0025" pos="0.0169753 0.0169753 0" quat="0.92388 0 0 0.382683" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_97" size="0.00599105 0.000368146 0.0025" pos="0.0173868 0.0165536 0" quat="0.928506 0 0 0.371317" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_97_vis" size="0.00599105 0.000368146 0.0025" pos="0.0173868 0.0165536 0" quat="0.928506 0 0 0.371317" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_98" size="0.00599105 0.000368146 0.0025" pos="0.0177878 0.0161219 0" quat="0.932993 0 0 0.359895" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_98_vis" size="0.00599105 0.000368146 0.0025" pos="0.0177878 0.0161219 0" quat="0.932993 0 0 0.359895" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_99" size="0.00599105 0.000368146 0.0025" pos="0.0181781 0.0156805 0" quat="0.937339 0 0 0.348419" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_99_vis" size="0.00599105 0.000368146 0.0025" pos="0.0181781 0.0156805 0" quat="0.937339 0 0 0.348419" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_100" size="0.00599105 0.000368146 0.0025" pos="0.0185574 0.0152297 0" quat="0.941544 0 0 0.33689" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_100_vis" size="0.00599105 0.000368146 0.0025" pos="0.0185574 0.0152297 0" quat="0.941544 0 0 0.33689" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_101" size="0.00599105 0.000368146 0.0025" pos="0.0189256 0.0147697 0" quat="0.945607 0 0 0.32531" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_101_vis" size="0.00599105 0.000368146 0.0025" pos="0.0189256 0.0147697 0" quat="0.945607 0 0 0.32531" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_102" size="0.00599105 0.000368146 0.0025" pos="0.0192824 0.0143008 0" quat="0.949528 0 0 0.313682" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_102_vis" size="0.00599105 0.000368146 0.0025" pos="0.0192824 0.0143008 0" quat="0.949528 0 0 0.313682" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_103" size="0.00599105 0.000368146 0.0025" pos="0.0196275 0.0138233 0" quat="0.953306 0 0 0.302006" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_103_vis" size="0.00599105 0.000368146 0.0025" pos="0.0196275 0.0138233 0" quat="0.953306 0 0 0.302006" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_104" size="0.00599105 0.000368146 0.0025" pos="0.0199608 0.0133374 0" quat="0.95694 0 0 0.290285" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_104_vis" size="0.00599105 0.000368146 0.0025" pos="0.0199608 0.0133374 0" quat="0.95694 0 0 0.290285" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_105" size="0.00599105 0.000368146 0.0025" pos="0.0202821 0.0128435 0" quat="0.960431 0 0 0.27852" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_105_vis" size="0.00599105 0.000368146 0.0025" pos="0.0202821 0.0128435 0" quat="0.960431 0 0 0.27852" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_106" size="0.00599105 0.000368146 0.0025" pos="0.0205912 0.0123419 0" quat="0.963776 0 0 0.266713" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_106_vis" size="0.00599105 0.000368146 0.0025" pos="0.0205912 0.0123419 0" quat="0.963776 0 0 0.266713" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_107" size="0.00599105 0.000368146 0.0025" pos="0.0208879 0.0118329 0" quat="0.966976 0 0 0.254866" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_107_vis" size="0.00599105 0.000368146 0.0025" pos="0.0208879 0.0118329 0" quat="0.966976 0 0 0.254866" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_108" size="0.00599105 0.000368146 0.0025" pos="0.021172 0.0113167 0" quat="0.970031 0 0 0.24298" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_108_vis" size="0.00599105 0.000368146 0.0025" pos="0.021172 0.0113167 0" quat="0.970031 0 0 0.24298" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_109" size="0.00599105 0.000368146 0.0025" pos="0.0214434 0.0107937 0" quat="0.97294 0 0 0.231058" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_109_vis" size="0.00599105 0.000368146 0.0025" pos="0.0214434 0.0107937 0" quat="0.97294 0 0 0.231058" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_110" size="0.00599105 0.000368146 0.0025" pos="0.0217018 0.0102642 0" quat="0.975702 0 0 0.219101" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_110_vis" size="0.00599105 0.000368146 0.0025" pos="0.0217018 0.0102642 0" quat="0.975702 0 0 0.219101" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_111" size="0.00599105 0.000368146 0.0025" pos="0.0219472 0.0097285 0" quat="0.978317 0 0 0.207111" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_111_vis" size="0.00599105 0.000368146 0.0025" pos="0.0219472 0.0097285 0" quat="0.978317 0 0 0.207111" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_112" size="0.00599105 0.000368146 0.0025" pos="0.0221793 0.00918696 0" quat="0.980785 0 0 0.19509" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_112_vis" size="0.00599105 0.000368146 0.0025" pos="0.0221793 0.00918696 0" quat="0.980785 0 0 0.19509" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_113" size="0.00599105 0.000368146 0.0025" pos="0.0223981 0.00863989 0" quat="0.983105 0 0 0.18304" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_113_vis" size="0.00599105 0.000368146 0.0025" pos="0.0223981 0.00863989 0" quat="0.983105 0 0 0.18304" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_114" size="0.00599105 0.000368146 0.0025" pos="0.0226034 0.00808761 0" quat="0.985278 0 0 0.170962" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_114_vis" size="0.00599105 0.000368146 0.0025" pos="0.0226034 0.00808761 0" quat="0.985278 0 0 0.170962" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_115" size="0.00599105 0.000368146 0.0025" pos="0.022795 0.00753046 0" quat="0.987301 0 0 0.158858" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_115_vis" size="0.00599105 0.000368146 0.0025" pos="0.022795 0.00753046 0" quat="0.987301 0 0 0.158858" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_116" size="0.00599105 0.000368146 0.0025" pos="0.022973 0.00696877 0" quat="0.989177 0 0 0.14673" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_116_vis" size="0.00599105 0.000368146 0.0025" pos="0.022973 0.00696877 0" quat="0.989177 0 0 0.14673" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_117" size="0.00599105 0.000368146 0.0025" pos="0.0231371 0.00640289 0" quat="0.990903 0 0 0.134581" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_117_vis" size="0.00599105 0.000368146 0.0025" pos="0.0231371 0.00640289 0" quat="0.990903 0 0 0.134581" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_118" size="0.00599105 0.000368146 0.0025" pos="0.0232872 0.00583315 0" quat="0.99248 0 0 0.122411" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_118_vis" size="0.00599105 0.000368146 0.0025" pos="0.0232872 0.00583315 0" quat="0.99248 0 0 0.122411" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_119" size="0.00599105 0.000368146 0.0025" pos="0.0234234 0.0052599 0" quat="0.993907 0 0 0.110222" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_119_vis" size="0.00599105 0.000368146 0.0025" pos="0.0234234 0.0052599 0" quat="0.993907 0 0 0.110222" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_120" size="0.00599105 0.000368146 0.0025" pos="0.0235454 0.00468347 0" quat="0.995185 0 0 0.0980171" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_120_vis" size="0.00599105 0.000368146 0.0025" pos="0.0235454 0.00468347 0" quat="0.995185 0 0 0.0980171" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_121" size="0.00599105 0.000368146 0.0025" pos="0.0236533 0.00410423 0" quat="0.996313 0 0 0.0857973" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_121_vis" size="0.00599105 0.000368146 0.0025" pos="0.0236533 0.00410423 0" quat="0.996313 0 0 0.0857973" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_122" size="0.00599105 0.000368146 0.0025" pos="0.0237469 0.00352251 0" quat="0.99729 0 0 0.0735646" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_122_vis" size="0.00599105 0.000368146 0.0025" pos="0.0237469 0.00352251 0" quat="0.99729 0 0 0.0735646" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_123" size="0.00599105 0.000368146 0.0025" pos="0.0238262 0.00293868 0" quat="0.998118 0 0 0.0613207" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_123_vis" size="0.00599105 0.000368146 0.0025" pos="0.0238262 0.00293868 0" quat="0.998118 0 0 0.0613207" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_124" size="0.00599105 0.000368146 0.0025" pos="0.0238911 0.00235307 0" quat="0.998795 0 0 0.0490677" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_124_vis" size="0.00599105 0.000368146 0.0025" pos="0.0238911 0.00235307 0" quat="0.998795 0 0 0.0490677" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_125" size="0.00599105 0.000368146 0.0025" pos="0.0239416 0.00176604 0" quat="0.999322 0 0 0.0368072" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_125_vis" size="0.00599105 0.000368146 0.0025" pos="0.0239416 0.00176604 0" quat="0.999322 0 0 0.0368072" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_126" size="0.00599105 0.000368146 0.0025" pos="0.0239778 0.00117795 0" quat="0.999699 0 0 0.0245412" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_126_vis" size="0.00599105 0.000368146 0.0025" pos="0.0239778 0.00117795 0" quat="0.999699 0 0 0.0245412" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_127" size="0.00599105 0.000368146 0.0025" pos="0.0239995 0.000589154 0" quat="0.999925 0 0 0.0122715" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_127_vis" size="0.00599105 0.000368146 0.0025" pos="0.0239995 0.000589154 0" quat="0.999925 0 0 0.0122715" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_128" size="0.00599105 0.000368146 0.0025" pos="0.0240067 0 0" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_128_vis" size="0.00599105 0.000368146 0.0025" pos="0.0240067 0 0" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_129" size="0.00599105 0.000368146 0.0025" pos="0.0239995 -0.000589154 0" quat="0.999925 0 0 -0.0122715" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_129_vis" size="0.00599105 0.000368146 0.0025" pos="0.0239995 -0.000589154 0" quat="0.999925 0 0 -0.0122715" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_130" size="0.00599105 0.000368146 0.0025" pos="0.0239778 -0.00117795 0" quat="0.999699 0 0 -0.0245412" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_130_vis" size="0.00599105 0.000368146 0.0025" pos="0.0239778 -0.00117795 0" quat="0.999699 0 0 -0.0245412" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_131" size="0.00599105 0.000368146 0.0025" pos="0.0239416 -0.00176604 0" quat="0.999322 0 0 -0.0368072" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_131_vis" size="0.00599105 0.000368146 0.0025" pos="0.0239416 -0.00176604 0" quat="0.999322 0 0 -0.0368072" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_132" size="0.00599105 0.000368146 0.0025" pos="0.0238911 -0.00235307 0" quat="0.998795 0 0 -0.0490677" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_132_vis" size="0.00599105 0.000368146 0.0025" pos="0.0238911 -0.00235307 0" quat="0.998795 0 0 -0.0490677" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_133" size="0.00599105 0.000368146 0.0025" pos="0.0238262 -0.00293868 0" quat="0.998118 0 0 -0.0613207" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_133_vis" size="0.00599105 0.000368146 0.0025" pos="0.0238262 -0.00293868 0" quat="0.998118 0 0 -0.0613207" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_134" size="0.00599105 0.000368146 0.0025" pos="0.0237469 -0.00352251 0" quat="0.99729 0 0 -0.0735646" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_134_vis" size="0.00599105 0.000368146 0.0025" pos="0.0237469 -0.00352251 0" quat="0.99729 0 0 -0.0735646" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_135" size="0.00599105 0.000368146 0.0025" pos="0.0236533 -0.00410423 0" quat="0.996313 0 0 -0.0857973" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_135_vis" size="0.00599105 0.000368146 0.0025" pos="0.0236533 -0.00410423 0" quat="0.996313 0 0 -0.0857973" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_136" size="0.00599105 0.000368146 0.0025" pos="0.0235454 -0.00468347 0" quat="0.995185 0 0 -0.0980171" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_136_vis" size="0.00599105 0.000368146 0.0025" pos="0.0235454 -0.00468347 0" quat="0.995185 0 0 -0.0980171" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_137" size="0.00599105 0.000368146 0.0025" pos="0.0234234 -0.0052599 0" quat="0.993907 0 0 -0.110222" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_137_vis" size="0.00599105 0.000368146 0.0025" pos="0.0234234 -0.0052599 0" quat="0.993907 0 0 -0.110222" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_138" size="0.00599105 0.000368146 0.0025" pos="0.0232872 -0.00583315 0" quat="0.99248 0 0 -0.122411" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_138_vis" size="0.00599105 0.000368146 0.0025" pos="0.0232872 -0.00583315 0" quat="0.99248 0 0 -0.122411" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_139" size="0.00599105 0.000368146 0.0025" pos="0.0231371 -0.00640289 0" quat="0.990903 0 0 -0.134581" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_139_vis" size="0.00599105 0.000368146 0.0025" pos="0.0231371 -0.00640289 0" quat="0.990903 0 0 -0.134581" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_140" size="0.00599105 0.000368146 0.0025" pos="0.022973 -0.00696877 0" quat="0.989177 0 0 -0.14673" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_140_vis" size="0.00599105 0.000368146 0.0025" pos="0.022973 -0.00696877 0" quat="0.989177 0 0 -0.14673" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_141" size="0.00599105 0.000368146 0.0025" pos="0.022795 -0.00753046 0" quat="0.987301 0 0 -0.158858" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_141_vis" size="0.00599105 0.000368146 0.0025" pos="0.022795 -0.00753046 0" quat="0.987301 0 0 -0.158858" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_142" size="0.00599105 0.000368146 0.0025" pos="0.0226034 -0.00808761 0" quat="0.985278 0 0 -0.170962" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_142_vis" size="0.00599105 0.000368146 0.0025" pos="0.0226034 -0.00808761 0" quat="0.985278 0 0 -0.170962" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_143" size="0.00599105 0.000368146 0.0025" pos="0.0223981 -0.00863989 0" quat="0.983105 0 0 -0.18304" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_143_vis" size="0.00599105 0.000368146 0.0025" pos="0.0223981 -0.00863989 0" quat="0.983105 0 0 -0.18304" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_144" size="0.00599105 0.000368146 0.0025" pos="0.0221793 -0.00918696 0" quat="0.980785 0 0 -0.19509" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_144_vis" size="0.00599105 0.000368146 0.0025" pos="0.0221793 -0.00918696 0" quat="0.980785 0 0 -0.19509" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_145" size="0.00599105 0.000368146 0.0025" pos="0.0219472 -0.0097285 0" quat="0.978317 0 0 -0.207111" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_145_vis" size="0.00599105 0.000368146 0.0025" pos="0.0219472 -0.0097285 0" quat="0.978317 0 0 -0.207111" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_146" size="0.00599105 0.000368146 0.0025" pos="0.0217018 -0.0102642 0" quat="0.975702 0 0 -0.219101" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_146_vis" size="0.00599105 0.000368146 0.0025" pos="0.0217018 -0.0102642 0" quat="0.975702 0 0 -0.219101" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_147" size="0.00599105 0.000368146 0.0025" pos="0.0214434 -0.0107937 0" quat="0.97294 0 0 -0.231058" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_147_vis" size="0.00599105 0.000368146 0.0025" pos="0.0214434 -0.0107937 0" quat="0.97294 0 0 -0.231058" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_148" size="0.00599105 0.000368146 0.0025" pos="0.021172 -0.0113167 0" quat="0.970031 0 0 -0.24298" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_148_vis" size="0.00599105 0.000368146 0.0025" pos="0.021172 -0.0113167 0" quat="0.970031 0 0 -0.24298" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_149" size="0.00599105 0.000368146 0.0025" pos="0.0208879 -0.0118329 0" quat="0.966976 0 0 -0.254866" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_149_vis" size="0.00599105 0.000368146 0.0025" pos="0.0208879 -0.0118329 0" quat="0.966976 0 0 -0.254866" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_150" size="0.00599105 0.000368146 0.0025" pos="0.0205912 -0.0123419 0" quat="0.963776 0 0 -0.266713" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_150_vis" size="0.00599105 0.000368146 0.0025" pos="0.0205912 -0.0123419 0" quat="0.963776 0 0 -0.266713" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_151" size="0.00599105 0.000368146 0.0025" pos="0.0202821 -0.0128435 0" quat="0.960431 0 0 -0.27852" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_151_vis" size="0.00599105 0.000368146 0.0025" pos="0.0202821 -0.0128435 0" quat="0.960431 0 0 -0.27852" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_152" size="0.00599105 0.000368146 0.0025" pos="0.0199608 -0.0133374 0" quat="0.95694 0 0 -0.290285" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_152_vis" size="0.00599105 0.000368146 0.0025" pos="0.0199608 -0.0133374 0" quat="0.95694 0 0 -0.290285" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_153" size="0.00599105 0.000368146 0.0025" pos="0.0196275 -0.0138233 0" quat="0.953306 0 0 -0.302006" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_153_vis" size="0.00599105 0.000368146 0.0025" pos="0.0196275 -0.0138233 0" quat="0.953306 0 0 -0.302006" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_154" size="0.00599105 0.000368146 0.0025" pos="0.0192824 -0.0143008 0" quat="0.949528 0 0 -0.313682" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_154_vis" size="0.00599105 0.000368146 0.0025" pos="0.0192824 -0.0143008 0" quat="0.949528 0 0 -0.313682" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_155" size="0.00599105 0.000368146 0.0025" pos="0.0189256 -0.0147697 0" quat="0.945607 0 0 -0.32531" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_155_vis" size="0.00599105 0.000368146 0.0025" pos="0.0189256 -0.0147697 0" quat="0.945607 0 0 -0.32531" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_156" size="0.00599105 0.000368146 0.0025" pos="0.0185574 -0.0152297 0" quat="0.941544 0 0 -0.33689" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_156_vis" size="0.00599105 0.000368146 0.0025" pos="0.0185574 -0.0152297 0" quat="0.941544 0 0 -0.33689" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_157" size="0.00599105 0.000368146 0.0025" pos="0.0181781 -0.0156805 0" quat="0.937339 0 0 -0.348419" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_157_vis" size="0.00599105 0.000368146 0.0025" pos="0.0181781 -0.0156805 0" quat="0.937339 0 0 -0.348419" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_158" size="0.00599105 0.000368146 0.0025" pos="0.0177878 -0.0161219 0" quat="0.932993 0 0 -0.359895" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_158_vis" size="0.00599105 0.000368146 0.0025" pos="0.0177878 -0.0161219 0" quat="0.932993 0 0 -0.359895" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_159" size="0.00599105 0.000368146 0.0025" pos="0.0173868 -0.0165536 0" quat="0.928506 0 0 -0.371317" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_159_vis" size="0.00599105 0.000368146 0.0025" pos="0.0173868 -0.0165536 0" quat="0.928506 0 0 -0.371317" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_160" size="0.00599105 0.000368146 0.0025" pos="0.0169753 -0.0169753 0" quat="0.92388 0 0 -0.382683" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_160_vis" size="0.00599105 0.000368146 0.0025" pos="0.0169753 -0.0169753 0" quat="0.92388 0 0 -0.382683" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_161" size="0.00599105 0.000368146 0.0025" pos="0.0165536 -0.0173868 0" quat="0.919114 0 0 -0.393992" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_161_vis" size="0.00599105 0.000368146 0.0025" pos="0.0165536 -0.0173868 0" quat="0.919114 0 0 -0.393992" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_162" size="0.00599105 0.000368146 0.0025" pos="0.0161219 -0.0177878 0" quat="0.91421 0 0 -0.405241" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_162_vis" size="0.00599105 0.000368146 0.0025" pos="0.0161219 -0.0177878 0" quat="0.91421 0 0 -0.405241" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_163" size="0.00599105 0.000368146 0.0025" pos="0.0156805 -0.0181781 0" quat="0.909168 0 0 -0.41643" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_163_vis" size="0.00599105 0.000368146 0.0025" pos="0.0156805 -0.0181781 0" quat="0.909168 0 0 -0.41643" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_164" size="0.00599105 0.000368146 0.0025" pos="0.0152297 -0.0185574 0" quat="0.903989 0 0 -0.427555" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_164_vis" size="0.00599105 0.000368146 0.0025" pos="0.0152297 -0.0185574 0" quat="0.903989 0 0 -0.427555" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_165" size="0.00599105 0.000368146 0.0025" pos="0.0147697 -0.0189256 0" quat="0.898674 0 0 -0.438616" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_165_vis" size="0.00599105 0.000368146 0.0025" pos="0.0147697 -0.0189256 0" quat="0.898674 0 0 -0.438616" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_166" size="0.00599105 0.000368146 0.0025" pos="0.0143008 -0.0192824 0" quat="0.893224 0 0 -0.449611" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_166_vis" size="0.00599105 0.000368146 0.0025" pos="0.0143008 -0.0192824 0" quat="0.893224 0 0 -0.449611" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_167" size="0.00599105 0.000368146 0.0025" pos="0.0138233 -0.0196275 0" quat="0.88764 0 0 -0.460539" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_167_vis" size="0.00599105 0.000368146 0.0025" pos="0.0138233 -0.0196275 0" quat="0.88764 0 0 -0.460539" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_168" size="0.00599105 0.000368146 0.0025" pos="0.0133374 -0.0199608 0" quat="0.881921 0 0 -0.471397" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_168_vis" size="0.00599105 0.000368146 0.0025" pos="0.0133374 -0.0199608 0" quat="0.881921 0 0 -0.471397" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_169" size="0.00599105 0.000368146 0.0025" pos="0.0128435 -0.0202821 0" quat="0.87607 0 0 -0.482184" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_169_vis" size="0.00599105 0.000368146 0.0025" pos="0.0128435 -0.0202821 0" quat="0.87607 0 0 -0.482184" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_170" size="0.00599105 0.000368146 0.0025" pos="0.0123419 -0.0205912 0" quat="0.870087 0 0 -0.492898" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_170_vis" size="0.00599105 0.000368146 0.0025" pos="0.0123419 -0.0205912 0" quat="0.870087 0 0 -0.492898" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_171" size="0.00599105 0.000368146 0.0025" pos="0.0118329 -0.0208879 0" quat="0.863973 0 0 -0.503538" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_171_vis" size="0.00599105 0.000368146 0.0025" pos="0.0118329 -0.0208879 0" quat="0.863973 0 0 -0.503538" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_172" size="0.00599105 0.000368146 0.0025" pos="0.0113167 -0.021172 0" quat="0.857729 0 0 -0.514103" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_172_vis" size="0.00599105 0.000368146 0.0025" pos="0.0113167 -0.021172 0" quat="0.857729 0 0 -0.514103" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_173" size="0.00599105 0.000368146 0.0025" pos="0.0107937 -0.0214434 0" quat="0.851355 0 0 -0.52459" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_173_vis" size="0.00599105 0.000368146 0.0025" pos="0.0107937 -0.0214434 0" quat="0.851355 0 0 -0.52459" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_174" size="0.00599105 0.000368146 0.0025" pos="0.0102642 -0.0217018 0" quat="0.844854 0 0 -0.534998" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_174_vis" size="0.00599105 0.000368146 0.0025" pos="0.0102642 -0.0217018 0" quat="0.844854 0 0 -0.534998" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_175" size="0.00599105 0.000368146 0.0025" pos="0.0097285 -0.0219472 0" quat="0.838225 0 0 -0.545325" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_175_vis" size="0.00599105 0.000368146 0.0025" pos="0.0097285 -0.0219472 0" quat="0.838225 0 0 -0.545325" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_176" size="0.00599105 0.000368146 0.0025" pos="0.00918696 -0.0221793 0" quat="0.83147 0 0 -0.55557" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_176_vis" size="0.00599105 0.000368146 0.0025" pos="0.00918696 -0.0221793 0" quat="0.83147 0 0 -0.55557" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_177" size="0.00599105 0.000368146 0.0025" pos="0.00863989 -0.0223981 0" quat="0.824589 0 0 -0.565732" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_177_vis" size="0.00599105 0.000368146 0.0025" pos="0.00863989 -0.0223981 0" quat="0.824589 0 0 -0.565732" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_178" size="0.00599105 0.000368146 0.0025" pos="0.00808761 -0.0226034 0" quat="0.817585 0 0 -0.575808" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_178_vis" size="0.00599105 0.000368146 0.0025" pos="0.00808761 -0.0226034 0" quat="0.817585 0 0 -0.575808" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_179" size="0.00599105 0.000368146 0.0025" pos="0.00753046 -0.022795 0" quat="0.810457 0 0 -0.585798" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_179_vis" size="0.00599105 0.000368146 0.0025" pos="0.00753046 -0.022795 0" quat="0.810457 0 0 -0.585798" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_180" size="0.00599105 0.000368146 0.0025" pos="0.00696877 -0.022973 0" quat="0.803208 0 0 -0.595699" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_180_vis" size="0.00599105 0.000368146 0.0025" pos="0.00696877 -0.022973 0" quat="0.803208 0 0 -0.595699" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_181" size="0.00599105 0.000368146 0.0025" pos="0.00640289 -0.0231371 0" quat="0.795837 0 0 -0.605511" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_181_vis" size="0.00599105 0.000368146 0.0025" pos="0.00640289 -0.0231371 0" quat="0.795837 0 0 -0.605511" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_182" size="0.00599105 0.000368146 0.0025" pos="0.00583315 -0.0232872 0" quat="0.788346 0 0 -0.615232" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_182_vis" size="0.00599105 0.000368146 0.0025" pos="0.00583315 -0.0232872 0" quat="0.788346 0 0 -0.615232" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_183" size="0.00599105 0.000368146 0.0025" pos="0.0052599 -0.0234234 0" quat="0.780737 0 0 -0.624859" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_183_vis" size="0.00599105 0.000368146 0.0025" pos="0.0052599 -0.0234234 0" quat="0.780737 0 0 -0.624859" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_184" size="0.00599105 0.000368146 0.0025" pos="0.00468347 -0.0235454 0" quat="0.77301 0 0 -0.634393" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_184_vis" size="0.00599105 0.000368146 0.0025" pos="0.00468347 -0.0235454 0" quat="0.77301 0 0 -0.634393" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_185" size="0.00599105 0.000368146 0.0025" pos="0.00410423 -0.0236533 0" quat="0.765167 0 0 -0.643832" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_185_vis" size="0.00599105 0.000368146 0.0025" pos="0.00410423 -0.0236533 0" quat="0.765167 0 0 -0.643832" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_186" size="0.00599105 0.000368146 0.0025" pos="0.00352251 -0.0237469 0" quat="0.757209 0 0 -0.653173" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_186_vis" size="0.00599105 0.000368146 0.0025" pos="0.00352251 -0.0237469 0" quat="0.757209 0 0 -0.653173" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_187" size="0.00599105 0.000368146 0.0025" pos="0.00293868 -0.0238262 0" quat="0.749136 0 0 -0.662416" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_187_vis" size="0.00599105 0.000368146 0.0025" pos="0.00293868 -0.0238262 0" quat="0.749136 0 0 -0.662416" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_188" size="0.00599105 0.000368146 0.0025" pos="0.00235307 -0.0238911 0" quat="0.740951 0 0 -0.671559" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_188_vis" size="0.00599105 0.000368146 0.0025" pos="0.00235307 -0.0238911 0" quat="0.740951 0 0 -0.671559" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_189" size="0.00599105 0.000368146 0.0025" pos="0.00176604 -0.0239416 0" quat="0.732654 0 0 -0.680601" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_189_vis" size="0.00599105 0.000368146 0.0025" pos="0.00176604 -0.0239416 0" quat="0.732654 0 0 -0.680601" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_190" size="0.00599105 0.000368146 0.0025" pos="0.00117795 -0.0239778 0" quat="0.724247 0 0 -0.689541" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_190_vis" size="0.00599105 0.000368146 0.0025" pos="0.00117795 -0.0239778 0" quat="0.724247 0 0 -0.689541" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_191" size="0.00599105 0.000368146 0.0025" pos="0.000589154 -0.0239995 0" quat="0.715731 0 0 -0.698376" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_191_vis" size="0.00599105 0.000368146 0.0025" pos="0.000589154 -0.0239995 0" quat="0.715731 0 0 -0.698376" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_192" size="0.00599105 0.000368146 0.0025" pos="0 -0.0240067 0" quat="0.707107 0 0 -0.707107" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_192_vis" size="0.00599105 0.000368146 0.0025" pos="0 -0.0240067 0" quat="0.707107 0 0 -0.707107" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_193" size="0.00599105 0.000368146 0.0025" pos="-0.000589154 -0.0239995 0" quat="0.698376 0 0 -0.715731" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_193_vis" size="0.00599105 0.000368146 0.0025" pos="-0.000589154 -0.0239995 0" quat="0.698376 0 0 -0.715731" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_194" size="0.00599105 0.000368146 0.0025" pos="-0.00117795 -0.0239778 0" quat="0.689541 0 0 -0.724247" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_194_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00117795 -0.0239778 0" quat="0.689541 0 0 -0.724247" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_195" size="0.00599105 0.000368146 0.0025" pos="-0.00176604 -0.0239416 0" quat="0.680601 0 0 -0.732654" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_195_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00176604 -0.0239416 0" quat="0.680601 0 0 -0.732654" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_196" size="0.00599105 0.000368146 0.0025" pos="-0.00235307 -0.0238911 0" quat="0.671559 0 0 -0.740951" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_196_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00235307 -0.0238911 0" quat="0.671559 0 0 -0.740951" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_197" size="0.00599105 0.000368146 0.0025" pos="-0.00293868 -0.0238262 0" quat="0.662416 0 0 -0.749136" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_197_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00293868 -0.0238262 0" quat="0.662416 0 0 -0.749136" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_198" size="0.00599105 0.000368146 0.0025" pos="-0.00352251 -0.0237469 0" quat="0.653173 0 0 -0.757209" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_198_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00352251 -0.0237469 0" quat="0.653173 0 0 -0.757209" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_199" size="0.00599105 0.000368146 0.0025" pos="-0.00410423 -0.0236533 0" quat="0.643832 0 0 -0.765167" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_199_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00410423 -0.0236533 0" quat="0.643832 0 0 -0.765167" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_200" size="0.00599105 0.000368146 0.0025" pos="-0.00468347 -0.0235454 0" quat="0.634393 0 0 -0.77301" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_200_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00468347 -0.0235454 0" quat="0.634393 0 0 -0.77301" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_201" size="0.00599105 0.000368146 0.0025" pos="-0.0052599 -0.0234234 0" quat="0.624859 0 0 -0.780737" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_201_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0052599 -0.0234234 0" quat="0.624859 0 0 -0.780737" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_202" size="0.00599105 0.000368146 0.0025" pos="-0.00583315 -0.0232872 0" quat="0.615232 0 0 -0.788346" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_202_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00583315 -0.0232872 0" quat="0.615232 0 0 -0.788346" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_203" size="0.00599105 0.000368146 0.0025" pos="-0.00640289 -0.0231371 0" quat="0.605511 0 0 -0.795837" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_203_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00640289 -0.0231371 0" quat="0.605511 0 0 -0.795837" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_204" size="0.00599105 0.000368146 0.0025" pos="-0.00696877 -0.022973 0" quat="0.595699 0 0 -0.803208" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_204_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00696877 -0.022973 0" quat="0.595699 0 0 -0.803208" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_205" size="0.00599105 0.000368146 0.0025" pos="-0.00753046 -0.022795 0" quat="0.585798 0 0 -0.810457" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_205_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00753046 -0.022795 0" quat="0.585798 0 0 -0.810457" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_206" size="0.00599105 0.000368146 0.0025" pos="-0.00808761 -0.0226034 0" quat="0.575808 0 0 -0.817585" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_206_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00808761 -0.0226034 0" quat="0.575808 0 0 -0.817585" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_207" size="0.00599105 0.000368146 0.0025" pos="-0.00863989 -0.0223981 0" quat="0.565732 0 0 -0.824589" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_207_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00863989 -0.0223981 0" quat="0.565732 0 0 -0.824589" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_208" size="0.00599105 0.000368146 0.0025" pos="-0.00918696 -0.0221793 0" quat="0.55557 0 0 -0.83147" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_208_vis" size="0.00599105 0.000368146 0.0025" pos="-0.00918696 -0.0221793 0" quat="0.55557 0 0 -0.83147" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_209" size="0.00599105 0.000368146 0.0025" pos="-0.0097285 -0.0219472 0" quat="0.545325 0 0 -0.838225" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_209_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0097285 -0.0219472 0" quat="0.545325 0 0 -0.838225" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_210" size="0.00599105 0.000368146 0.0025" pos="-0.0102642 -0.0217018 0" quat="0.534998 0 0 -0.844854" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_210_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0102642 -0.0217018 0" quat="0.534998 0 0 -0.844854" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_211" size="0.00599105 0.000368146 0.0025" pos="-0.0107937 -0.0214434 0" quat="0.52459 0 0 -0.851355" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_211_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0107937 -0.0214434 0" quat="0.52459 0 0 -0.851355" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_212" size="0.00599105 0.000368146 0.0025" pos="-0.0113167 -0.021172 0" quat="0.514103 0 0 -0.857729" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_212_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0113167 -0.021172 0" quat="0.514103 0 0 -0.857729" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_213" size="0.00599105 0.000368146 0.0025" pos="-0.0118329 -0.0208879 0" quat="0.503538 0 0 -0.863973" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_213_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0118329 -0.0208879 0" quat="0.503538 0 0 -0.863973" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_214" size="0.00599105 0.000368146 0.0025" pos="-0.0123419 -0.0205912 0" quat="0.492898 0 0 -0.870087" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_214_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0123419 -0.0205912 0" quat="0.492898 0 0 -0.870087" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_215" size="0.00599105 0.000368146 0.0025" pos="-0.0128435 -0.0202821 0" quat="0.482184 0 0 -0.87607" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_215_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0128435 -0.0202821 0" quat="0.482184 0 0 -0.87607" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_216" size="0.00599105 0.000368146 0.0025" pos="-0.0133374 -0.0199608 0" quat="0.471397 0 0 -0.881921" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_216_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0133374 -0.0199608 0" quat="0.471397 0 0 -0.881921" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_217" size="0.00599105 0.000368146 0.0025" pos="-0.0138233 -0.0196275 0" quat="0.460539 0 0 -0.88764" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_217_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0138233 -0.0196275 0" quat="0.460539 0 0 -0.88764" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_218" size="0.00599105 0.000368146 0.0025" pos="-0.0143008 -0.0192824 0" quat="0.449611 0 0 -0.893224" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_218_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0143008 -0.0192824 0" quat="0.449611 0 0 -0.893224" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_219" size="0.00599105 0.000368146 0.0025" pos="-0.0147697 -0.0189256 0" quat="0.438616 0 0 -0.898674" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_219_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0147697 -0.0189256 0" quat="0.438616 0 0 -0.898674" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_220" size="0.00599105 0.000368146 0.0025" pos="-0.0152297 -0.0185574 0" quat="0.427555 0 0 -0.903989" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_220_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0152297 -0.0185574 0" quat="0.427555 0 0 -0.903989" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_221" size="0.00599105 0.000368146 0.0025" pos="-0.0156805 -0.0181781 0" quat="0.41643 0 0 -0.909168" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_221_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0156805 -0.0181781 0" quat="0.41643 0 0 -0.909168" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_222" size="0.00599105 0.000368146 0.0025" pos="-0.0161219 -0.0177878 0" quat="0.405241 0 0 -0.91421" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_222_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0161219 -0.0177878 0" quat="0.405241 0 0 -0.91421" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_223" size="0.00599105 0.000368146 0.0025" pos="-0.0165536 -0.0173868 0" quat="0.393992 0 0 -0.919114" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_223_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0165536 -0.0173868 0" quat="0.393992 0 0 -0.919114" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_224" size="0.00599105 0.000368146 0.0025" pos="-0.0169753 -0.0169753 0" quat="0.382683 0 0 -0.92388" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_224_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0169753 -0.0169753 0" quat="0.382683 0 0 -0.92388" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_225" size="0.00599105 0.000368146 0.0025" pos="-0.0173868 -0.0165536 0" quat="0.371317 0 0 -0.928506" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_225_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0173868 -0.0165536 0" quat="0.371317 0 0 -0.928506" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_226" size="0.00599105 0.000368146 0.0025" pos="-0.0177878 -0.0161219 0" quat="0.359895 0 0 -0.932993" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_226_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0177878 -0.0161219 0" quat="0.359895 0 0 -0.932993" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_227" size="0.00599105 0.000368146 0.0025" pos="-0.0181781 -0.0156805 0" quat="0.348419 0 0 -0.937339" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_227_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0181781 -0.0156805 0" quat="0.348419 0 0 -0.937339" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_228" size="0.00599105 0.000368146 0.0025" pos="-0.0185574 -0.0152297 0" quat="0.33689 0 0 -0.941544" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_228_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0185574 -0.0152297 0" quat="0.33689 0 0 -0.941544" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_229" size="0.00599105 0.000368146 0.0025" pos="-0.0189256 -0.0147697 0" quat="0.32531 0 0 -0.945607" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_229_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0189256 -0.0147697 0" quat="0.32531 0 0 -0.945607" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_230" size="0.00599105 0.000368146 0.0025" pos="-0.0192824 -0.0143008 0" quat="0.313682 0 0 -0.949528" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_230_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0192824 -0.0143008 0" quat="0.313682 0 0 -0.949528" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_231" size="0.00599105 0.000368146 0.0025" pos="-0.0196275 -0.0138233 0" quat="0.302006 0 0 -0.953306" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_231_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0196275 -0.0138233 0" quat="0.302006 0 0 -0.953306" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_232" size="0.00599105 0.000368146 0.0025" pos="-0.0199608 -0.0133374 0" quat="0.290285 0 0 -0.95694" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_232_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0199608 -0.0133374 0" quat="0.290285 0 0 -0.95694" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_233" size="0.00599105 0.000368146 0.0025" pos="-0.0202821 -0.0128435 0" quat="0.27852 0 0 -0.960431" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_233_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0202821 -0.0128435 0" quat="0.27852 0 0 -0.960431" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_234" size="0.00599105 0.000368146 0.0025" pos="-0.0205912 -0.0123419 0" quat="0.266713 0 0 -0.963776" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_234_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0205912 -0.0123419 0" quat="0.266713 0 0 -0.963776" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_235" size="0.00599105 0.000368146 0.0025" pos="-0.0208879 -0.0118329 0" quat="0.254866 0 0 -0.966976" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_235_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0208879 -0.0118329 0" quat="0.254866 0 0 -0.966976" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_236" size="0.00599105 0.000368146 0.0025" pos="-0.021172 -0.0113167 0" quat="0.24298 0 0 -0.970031" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_236_vis" size="0.00599105 0.000368146 0.0025" pos="-0.021172 -0.0113167 0" quat="0.24298 0 0 -0.970031" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_237" size="0.00599105 0.000368146 0.0025" pos="-0.0214434 -0.0107937 0" quat="0.231058 0 0 -0.97294" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_237_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0214434 -0.0107937 0" quat="0.231058 0 0 -0.97294" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_238" size="0.00599105 0.000368146 0.0025" pos="-0.0217018 -0.0102642 0" quat="0.219101 0 0 -0.975702" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_238_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0217018 -0.0102642 0" quat="0.219101 0 0 -0.975702" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_239" size="0.00599105 0.000368146 0.0025" pos="-0.0219472 -0.0097285 0" quat="0.207111 0 0 -0.978317" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_239_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0219472 -0.0097285 0" quat="0.207111 0 0 -0.978317" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_240" size="0.00599105 0.000368146 0.0025" pos="-0.0221793 -0.00918696 0" quat="0.19509 0 0 -0.980785" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_240_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0221793 -0.00918696 0" quat="0.19509 0 0 -0.980785" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_241" size="0.00599105 0.000368146 0.0025" pos="-0.0223981 -0.00863989 0" quat="0.18304 0 0 -0.983105" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_241_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0223981 -0.00863989 0" quat="0.18304 0 0 -0.983105" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_242" size="0.00599105 0.000368146 0.0025" pos="-0.0226034 -0.00808761 0" quat="0.170962 0 0 -0.985278" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_242_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0226034 -0.00808761 0" quat="0.170962 0 0 -0.985278" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_243" size="0.00599105 0.000368146 0.0025" pos="-0.022795 -0.00753046 0" quat="0.158858 0 0 -0.987301" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_243_vis" size="0.00599105 0.000368146 0.0025" pos="-0.022795 -0.00753046 0" quat="0.158858 0 0 -0.987301" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_244" size="0.00599105 0.000368146 0.0025" pos="-0.022973 -0.00696877 0" quat="0.14673 0 0 -0.989177" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_244_vis" size="0.00599105 0.000368146 0.0025" pos="-0.022973 -0.00696877 0" quat="0.14673 0 0 -0.989177" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_245" size="0.00599105 0.000368146 0.0025" pos="-0.0231371 -0.00640289 0" quat="0.134581 0 0 -0.990903" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_245_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0231371 -0.00640289 0" quat="0.134581 0 0 -0.990903" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_246" size="0.00599105 0.000368146 0.0025" pos="-0.0232872 -0.00583315 0" quat="0.122411 0 0 -0.99248" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_246_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0232872 -0.00583315 0" quat="0.122411 0 0 -0.99248" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_247" size="0.00599105 0.000368146 0.0025" pos="-0.0234234 -0.0052599 0" quat="0.110222 0 0 -0.993907" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_247_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0234234 -0.0052599 0" quat="0.110222 0 0 -0.993907" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_248" size="0.00599105 0.000368146 0.0025" pos="-0.0235454 -0.00468347 0" quat="0.0980171 0 0 -0.995185" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_248_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0235454 -0.00468347 0" quat="0.0980171 0 0 -0.995185" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_249" size="0.00599105 0.000368146 0.0025" pos="-0.0236533 -0.00410423 0" quat="0.0857973 0 0 -0.996313" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_249_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0236533 -0.00410423 0" quat="0.0857973 0 0 -0.996313" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_250" size="0.00599105 0.000368146 0.0025" pos="-0.0237469 -0.00352251 0" quat="0.0735646 0 0 -0.99729" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_250_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0237469 -0.00352251 0" quat="0.0735646 0 0 -0.99729" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_251" size="0.00599105 0.000368146 0.0025" pos="-0.0238262 -0.00293868 0" quat="0.0613207 0 0 -0.998118" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_251_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0238262 -0.00293868 0" quat="0.0613207 0 0 -0.998118" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_252" size="0.00599105 0.000368146 0.0025" pos="-0.0238911 -0.00235307 0" quat="0.0490677 0 0 -0.998795" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_252_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0238911 -0.00235307 0" quat="0.0490677 0 0 -0.998795" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_253" size="0.00599105 0.000368146 0.0025" pos="-0.0239416 -0.00176604 0" quat="0.0368072 0 0 -0.999322" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_253_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0239416 -0.00176604 0" quat="0.0368072 0 0 -0.999322" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_254" size="0.00599105 0.000368146 0.0025" pos="-0.0239778 -0.00117795 0" quat="0.0245412 0 0 -0.999699" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_254_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0239778 -0.00117795 0" quat="0.0245412 0 0 -0.999699" type="box" contype="0" conaffinity="0" group="1" />
+            <geom name="hollow_cylinder_hc_255" size="0.00599105 0.000368146 0.0025" pos="-0.0239995 -0.000589154 0" quat="0.0122715 0 0 -0.999925" type="box" rgba="0.5 0 0 1" />
+            <geom name="hollow_cylinder_hc_255_vis" size="0.00599105 0.000368146 0.0025" pos="-0.0239995 -0.000589154 0" quat="0.0122715 0 0 -0.999925" type="box" contype="0" conaffinity="0" group="1" />
+            <site name="hollow_cylinder_center" pos="0 0 0" size="0.002" rgba="1 0 0 1" />
+            <site name="hollow_cylinder_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+        </body>
+
+        <geom pos="0.12 0 0.01" quat="0.5 -0.5 -0.5 0.5" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="3000" friction="0.95 0.3 0.1" group="1" rgba="1 0.1 0.1 1" mesh="taskboard_01_base" />
+        <!-- <geom pos="0.058 0 0.01" quat="0.5 0.5 0.5 0.5" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="3000" friction="0.95 0.3 0.1" group="1" rgba="1 0.1 0.1 1" mesh="taskboard_02_plate" conaffinity="0" contype="0" /> -->
+        <geom pos="0.058 0 0.01" quat="0.5 0.5 0.5 0.5" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="3000" friction="0.95 0.3 0.1" group="1" rgba="1 0.1 0.1 1" mesh="taskboard_02_plate" />
+        <geom size="0.003 0.0125" pos="0.0905 0.099 0.095" quat="0 -0.707107 0 0.707107" type="cylinder" solimp="0.998 0.998 0.001" solref="0.001 1" density="3000" friction="0.95 0.3 0.1" group="1" />
+        <geom pos="0.091 0.165 0.131" quat="0 1 0 0" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="3000" friction="0.95 0.3 0.1" group="1" rgba="0.4 0.9 0.1 1" mesh="07_SBARB6200ZZ_30" />
+        <geom pos="0.095 0.0275 0.043" quat="0 0 0 1" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="3000" friction="0.95 0.3 0.1" group="1" rgba="0.4 0.9 0.1 1" mesh="50_MBGNA30-2" />
+        <geom pos="0.0995 0.1575 0.05" quat="0 0 0 1" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="3000" friction="0.95 0.3 0.1" group="1" rgba="0.4 0.9 0.1 1" mesh="51_MBGNA60-2" />
+    </body>
+      <!--taskboard body -->
+
+    <light name="light1" diffuse=".8 .8 .8" dir="0 -.15 -1" directional="false" pos="1 1 4.0" specular="0.3 0.3 0.3" castshadow="false"/>
+    <light name="light2" diffuse=".8 .8 .8" dir="0 -.15 -1" directional="false" pos="-3. -3. 4.0" specular="0.3 0.3 0.3" castshadow="false"/>
+    <!-- front view -->
+    <camera mode="fixed" name="frontview" pos="1.6 0 1.45" quat="0.56 0.43 0.43 0.56"/>
+    <!-- bird view -->
+    <camera mode="fixed" name="birdview" pos="-0.2 0 3.0" quat="0.7071 0 0 0.7071"/>
+    <!-- agent view -->
+    <camera mode="fixed" name="agentview" pos="0.5 0 1.35" quat="0.653 0.271 0.271 0.653"/>
+    <!-- side view -->
+    <camera mode="fixed" name="sideview" pos="-0.05651774593317116 1.2761224129427358 1.4879572214102434" quat="0.009905065491771751 0.006877963156909582 0.5912228352893879 0.806418094001364" />
+  </worldbody>
+</mujoco>

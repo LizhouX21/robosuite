@@ -262,6 +262,7 @@ class Lift(SingleArmEnv):
         """
         Loads an xml model, puts it in self.model
         """
+        print("episode begin")
         super()._load_model()
 
         # Adjust base pose accordingly

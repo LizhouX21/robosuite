@@ -1,0 +1,26 @@
+<mujoco model="assy_part_07">
+  <option noslip_iterations="20">
+    <flag multiccd="enable"/>
+  </option>
+    <compiler angle="radian" />
+    <size njmax="500" nconmax="100" />
+    <asset>
+        <mesh file="meshes/07_SBARB6200ZZ_30.stl" name="pulley_mesh" scale="0.001 0.001 0.001"/>
+    </asset>
+      <visual>
+    <scale framewidth='.05' framelength='.3'/>
+  </visual>
+    <worldbody>
+        <body>
+            <body name="object">
+                <geom pos="0 0 0" mesh="pulley_mesh" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="4000" friction="0.95 0.3 0.1" group="0" contype="2" conaffinity="2"/>
+                <geom type="cylinder" pos="-0.004 0 0.0" euler='0 1.57079632679 0' size="0.027 .004" rgba="0 1 0 1" solimp="0.998 0.998 0.001" solref="0.001 1" density="4000" friction="0.95 0.3 0.1" group="0" contype="0"/>
+                <geom type="cylinder" pos="-0.019 0.0 0.0" euler='0 1.57079632679 0' size="0.017983 .011" rgba="0 0 1 1" solimp="0.998 0.998 0.001" solref="0.001 1" density="4000" friction="0.95 0.3 0.1" group="0" contype="0"/>
+                <site rgba="1 1 0 1" size="0.003" pos="0 0 0" name="top_center_site"/>
+            </body>
+                <site rgba="1 0 0 1" size="0.005" pos="-0.03 0 0" name="bottom_site"/>
+                <site rgba="0 1 0 1" size="0.005" pos="0 0.0 0" name="top_site"/>
+                <site rgba="0 0 1 1" size="0.005" pos="-0.015 0.027 0" name="horizontal_radius_site"/>
+        </body>
+    </worldbody>
+</mujoco>
