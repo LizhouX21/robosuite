@@ -517,8 +517,8 @@ class Lift(SingleArmEnv):
         #     terminated = True
 
         # Prematurely terminate if over q limit
-        if self.robots[0].check_q_limits():
-            terminated = True
+        # if self.robots[0].check_q_limits():
+        #     terminated = True
 
         # Prematurely terminate below table
         if self._below_table():
