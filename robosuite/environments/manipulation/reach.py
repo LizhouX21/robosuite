@@ -139,7 +139,7 @@ class Reach(SingleArmEnv):
         env_configuration="default",
         controller_configs=None,
         gripper_types="default",
-        initialization_noise="default",
+        initialization_noise={"magnitude": 0.0001, "type": "gaussian"},
         table_full_size=(0.8, 0.8, 0.05),
         table_friction=(1.0, 5e-3, 1e-4),
         use_camera_obs=True,
@@ -154,7 +154,7 @@ class Reach(SingleArmEnv):
         render_visual_mesh=True,
         render_gpu_device_id=-1,
         control_freq=20,
-        horizon=1000,
+        horizon=50,
         ignore_done=False,
         hard_reset=True,
         camera_names="agentview",
@@ -184,7 +184,7 @@ class Reach(SingleArmEnv):
         self.early_terminations=early_terminations
 
         # reach target pos
-        self.target_pos=np.array((0, 0, 1.25))
+        self.target_pos=np.array([0, 0, 1])
 
         super().__init__(
             robots=robots,
@@ -245,9 +245,9 @@ class Reach(SingleArmEnv):
         # sparse completion reward
         if not self.reward_shaping:
             if self._check_success():
-                reward = 500
-            elif self._below_table():
-                reward=-500
+                reward = 0
+            # elif self._below_table():
+            #     reward=-500
             else:
                 reward=-1
 
@@ -345,36 +345,11 @@ class Reach(SingleArmEnv):
             tex_attrib=tex_attrib,
             mat_attrib=mat_attrib,
         )
-        self.cube = BoxObject(
-            name="cube",
-            size_min=[0.020, 0.020, 0.020],  # [0.015, 0.015, 0.015],
-            size_max=[0.022, 0.022, 0.022],  # [0.018, 0.018, 0.018])
-            rgba=[1, 0, 0, 1],
-            material=redwood,
-        )
-
-        # Create placement initializer
-        if self.placement_initializer is not None:
-            self.placement_initializer.reset()
-            self.placement_initializer.add_objects(self.cube)
-        else:
-            self.placement_initializer = UniformRandomSampler(
-                name="ObjectSampler",
-                mujoco_objects=self.cube,
-                x_range=[-0.03, 0.03],
-                y_range=[-0.03, 0.03],
-                rotation=None,
-                ensure_object_boundary_in_range=False,
-                ensure_valid_placement=True,
-                reference_pos=self.table_offset,
-                z_offset=0.01,
-            )
 
         # task includes arena, robot, and objects of interest
         self.model = ManipulationTask(
             mujoco_arena=mujoco_arena,
             mujoco_robots=[robot.robot_model for robot in self.robots],
-            mujoco_objects=self.cube,
         )
 
     def _setup_references(self):
@@ -385,8 +360,6 @@ class Reach(SingleArmEnv):
         """
         super()._setup_references()
 
-        # Additional object references from this env
-        self.cube_body_id = self.sim.model.body_name2id(self.cube.root_body)
 
     def _setup_observables(self):
         """
@@ -396,40 +369,39 @@ class Reach(SingleArmEnv):
             OrderedDict: Dictionary mapping observable names to its corresponding Observable object
         """
         observables = super()._setup_observables()
-
-        # low-level object information
-        if self.use_object_obs:
-            # Get robot prefix and define observables modality
-            pf = self.robots[0].robot_model.naming_prefix
-            modality = "object"
-
             # cube-related observables
-            @sensor(modality=modality)
-            def cube_pos(obs_cache):
-                return np.array(self.sim.data.body_xpos[self.cube_body_id])
+        modality = "object"
 
-            @sensor(modality=modality)
-            def cube_quat(obs_cache):
-                return convert_quat(np.array(self.sim.data.body_xquat[self.cube_body_id]), to="xyzw")
+        # cube-related observables
+        @sensor(modality=modality)
+        def target_pos(obs_cache):
+            return self.target_pos
+        
+        @sensor(modality=modality)
+        def current_ee_vel(obs_cache):
+            return self.robots[0].recent_ee_vel.current[0:3]
+        # @sensor(modality=modality)
+        # def cube_quat(obs_cache):
+        #     return convert_quat(np.array(self.sim.data.body_xquat[self.cube_body_id]), to="xyzw")
 
-            # @sensor(modality=modality)
-            # def gripper_to_cube_pos(obs_cache):
-            #     return (
-            #         obs_cache[f"{pf}eef_pos"] - obs_cache["cube_pos"]
-            #         if f"{pf}eef_pos" in obs_cache and "cube_pos" in obs_cache
-            #         else np.zeros(3)
-            #     )
+        # @sensor(modality=modality)
+        # def gripper_to_cube_pos(obs_cache):
+        #     return (
+        #         obs_cache[f"{pf}eef_pos"] - obs_cache["cube_pos"]
+        #         if f"{pf}eef_pos" in obs_cache and "cube_pos" in obs_cache
+        #         else np.zeros(3)
+        #     )
 
-            sensors = [cube_pos, cube_quat]
-            names = [s.__name__ for s in sensors]
+        sensors = [target_pos,current_ee_vel]
+        names = [s.__name__ for s in sensors]
 
-            # Create observables
-            for name, s in zip(names, sensors):
-                observables[name] = Observable(
-                    name=name,
-                    sensor=s,
-                    sampling_rate=self.control_freq,
-                )
+        # Create observables
+        for name, s in zip(names, sensors):
+            observables[name] = Observable(
+                name=name,
+                sensor=s,
+                sampling_rate=self.control_freq,
+            ) 
 
         return observables
 
@@ -437,17 +409,8 @@ class Reach(SingleArmEnv):
         """
         Resets simulation internal configurations.
         """
+        self.target_pos=self._sample_target_goal()
         super()._reset_internal()
-
-        # Reset all object positions using initializer sampler if we're not directly loading from an xml
-        if not self.deterministic_reset:
-
-            # Sample from the placement initializer for all objects
-            object_placements = self.placement_initializer.sample()
-
-            # Loop through all objects and reset their positions
-            for obj_pos, obj_quat, obj in object_placements.values():
-                self.sim.data.set_joint_qpos(obj.joints[0], np.concatenate([np.array(obj_pos), np.array(obj_quat)]))
 
     def visualize(self, vis_settings):
         """
@@ -489,7 +452,7 @@ class Reach(SingleArmEnv):
     def _reached_pos(self):
         gripper_site_pos = self.sim.data.site_xpos[self.robots[0].eef_site_id]
         dist=np.linalg.norm(gripper_site_pos - self.target_pos)
-        if dist<0.003:
+        if dist<0.05:
             return True
         else:
             return False
@@ -549,3 +512,9 @@ class Reach(SingleArmEnv):
             terminated=True
 
         return terminated
+
+    def _sample_target_goal(self):
+        plane_xy=np.random.uniform(low=-0.2, high=0.2, size=(2,))
+        height_z=np.random.uniform(low=0.92, high=1.32, size=(1,))
+        target=np.concatenate((plane_xy,height_z))
+        return target
