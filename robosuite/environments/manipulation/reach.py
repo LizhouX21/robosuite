@@ -272,7 +272,8 @@ class Reach(SingleArmEnv):
 
         if self.reward_shaping:
             dist = np.linalg.norm(gripper_site_pos - self.target_pos)
-            reward = 1 - np.tanh(10.0 * dist)            
+            #reward = 1 - np.tanh(10.0 * dist)   
+            reward=-dist    
         return reward
     
 
@@ -409,7 +410,8 @@ class Reach(SingleArmEnv):
         """
         Resets simulation internal configurations.
         """
-        self.target_pos=self._sample_target_goal()
+        #self.target_pos=self._sample_target_goal()
+        self.target_pos=np.array([0,0,1.2])
         super()._reset_internal()
 
     def visualize(self, vis_settings):
