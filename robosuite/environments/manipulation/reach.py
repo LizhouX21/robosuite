@@ -241,7 +241,8 @@ class Reach(SingleArmEnv):
         reward = 0.0
 
         gripper_site_pos = self.sim.data.site_xpos[self.robots[0].eef_site_id]
-
+        # if self._check_success():
+        #     a=1
         # sparse completion reward
         if not self.reward_shaping:
             if self._check_success():
@@ -410,8 +411,7 @@ class Reach(SingleArmEnv):
         """
         Resets simulation internal configurations.
         """
-        #self.target_pos=self._sample_target_goal()
-        self.target_pos=np.array([0,0,1.2])
+        self.target_pos=self._sample_target_goal()
         super()._reset_internal()
 
     def visualize(self, vis_settings):
@@ -477,6 +477,8 @@ class Reach(SingleArmEnv):
         if self.early_terminations:
             done = done or self._check_terminated()
 
+
+        info["is_success"]=self._check_success()
         return reward, done, info
 
     def _check_terminated(self):
@@ -519,4 +521,5 @@ class Reach(SingleArmEnv):
         plane_xy=np.random.uniform(low=-0.2, high=0.2, size=(2,))
         height_z=np.random.uniform(low=0.92, high=1.32, size=(1,))
         target=np.concatenate((plane_xy,height_z))
+        target=np.array([0,0,1.2])
         return target
