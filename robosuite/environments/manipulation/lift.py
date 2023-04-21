@@ -400,15 +400,15 @@ class Lift(SingleArmEnv):
             def cube_quat(obs_cache):
                 return convert_quat(np.array(self.sim.data.body_xquat[self.cube_body_id]), to="xyzw")
 
-            # @sensor(modality=modality)
-            # def gripper_to_cube_pos(obs_cache):
-            #     return (
-            #         obs_cache[f"{pf}eef_pos"] - obs_cache["cube_pos"]
-            #         if f"{pf}eef_pos" in obs_cache and "cube_pos" in obs_cache
-            #         else np.zeros(3)
-            #     )
+            @sensor(modality=modality)
+            def gripper_to_cube_pos(obs_cache):
+                return (
+                    obs_cache[f"{pf}eef_pos"] - obs_cache["cube_pos"]
+                    if f"{pf}eef_pos" in obs_cache and "cube_pos" in obs_cache
+                    else np.zeros(3)
+                )
 
-            sensors = [cube_pos, cube_quat]
+            sensors = [cube_pos, cube_quat,gripper_to_cube_pos]
             names = [s.__name__ for s in sensors]
 
             # Create observables
@@ -473,6 +473,13 @@ class Lift(SingleArmEnv):
         else:
             return False
         
+    def _too_high(self):
+        if self._eef_xpos[2]>=self.table_offset[2]+0.5:
+            return True
+        else:
+            return False
+
+        
     def _post_action(self, action):
         """
         In addition to super method, add additional info if requested
@@ -523,5 +530,7 @@ class Lift(SingleArmEnv):
         # Prematurely terminate below table
         if self._below_table():
             terminated = True
+        if self._too_high():
+            terminated=True
 
         return terminated
