@@ -521,5 +521,5 @@ class Reach(SingleArmEnv):
         plane_xy=np.random.uniform(low=-0.2, high=0.2, size=(2,))
         height_z=np.random.uniform(low=0.92, high=1.32, size=(1,))
         target=np.concatenate((plane_xy,height_z))
-        target=np.array([0,0,1.2])
+        # target=np.array([0,0,1.2])#fixed target
         return target
