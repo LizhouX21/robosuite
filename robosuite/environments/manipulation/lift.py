@@ -240,8 +240,8 @@ class Lift(SingleArmEnv):
         # sparse completion reward
         if self._check_success():
             reward = 2.25
-        elif self._below_table():
-            reward=-2.25
+        elif self._check_terminated():
+            reward+=-200
 
         # use a shaping reward
         elif self.reward_shaping:
@@ -478,6 +478,11 @@ class Lift(SingleArmEnv):
             return True
         else:
             return False
+    def _out_of_roi(self):
+        if abs(self._eef_xpos[0]-self.sim.data.body_xpos[self.cube_body_id][0])>0.3:
+            return True
+        if abs(self._eef_xpos[1]-self.sim.data.body_xpos[self.cube_body_id][1])>0.3:
+            return True        
 
         
     def _post_action(self, action):
@@ -496,7 +501,8 @@ class Lift(SingleArmEnv):
         # allow episode to finish early if allowed
         if self.early_terminations:
             done = done or self._check_terminated()
-
+            
+        info["is_success"]=self._check_success()
         return reward, done, info
 
     def _check_terminated(self):
@@ -531,6 +537,8 @@ class Lift(SingleArmEnv):
         if self._below_table():
             terminated = True
         if self._too_high():
+            terminated=True
+        if self._out_of_roi():
             terminated=True
 
         return terminated
