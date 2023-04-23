@@ -239,7 +239,8 @@ class Lift(SingleArmEnv):
 
         # sparse completion reward
         if self._check_success():
-            reward = 2.25
+            #reward = 2.25
+            reward = 3
         elif self._check_terminated():
             reward+=-200
 
@@ -250,12 +251,14 @@ class Lift(SingleArmEnv):
             cube_pos = self.sim.data.body_xpos[self.cube_body_id]
             gripper_site_pos = self.sim.data.site_xpos[self.robots[0].eef_site_id]
             dist = np.linalg.norm(gripper_site_pos - cube_pos)
-            reaching_reward = 1 - np.tanh(10.0 * dist)
+            #reaching_reward = 1 - np.tanh(10.0 * dist)
+            reaching_reward = -dist
             reward += reaching_reward
 
             # grasping reward
             if self._check_grasp(gripper=self.robots[0].gripper, object_geoms=self.cube):
-                reward += 0.25
+                #reward += 0.25
+                reward += 1
 
         # Scale reward if requested
         if self.reward_scale is not None:
