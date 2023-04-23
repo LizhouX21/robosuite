@@ -68,8 +68,8 @@ class Wrapper:
         Args:
             **kwargs (dict): Any args to pass to environment render function
         """
-        return self.env.render(**kwargs)
-
+        #return self.env.render(**kwargs)#for gym like env
+        return self.env.render()#for robosuite env
     def observation_spec(self):
         """
         By default, grabs the normal environment observation_spec
