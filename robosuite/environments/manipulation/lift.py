@@ -211,38 +211,69 @@ class Lift(SingleArmEnv):
         )
 
     def reward(self, action=None):
+        # """
+        # Reward function for the task.
+
+        # Sparse un-normalized reward:
+
+        #     - a discrete reward of 2.25 is provided if the cube is lifted
+
+        # Un-normalized summed components if using reward shaping:
+
+        #     - Reaching: in [0, 1], to encourage the arm to reach the cube
+        #     - Grasping: in {0, 0.25}, non-zero if arm is grasping the cube
+        #     - Lifting: in {0, 1}, non-zero if arm has lifted the cube
+
+        # The sparse reward only consists of the lifting component.
+
+        # Note that the final reward is normalized and scaled by
+        # reward_scale / 2.25 as well so that the max score is equal to reward_scale
+
+        # Args:
+        #     action (np array): [NOT USED]
+
+        # Returns:
+        #     float: reward value
+        # """
+        # reward = 0.0
+
+        # # sparse completion reward
+        # if self._check_success():
+        #     #reward = 2.25
+        #     reward = 3
+        # elif self._check_terminated():
+        #     reward+=-200
+
+        # # use a shaping reward
+        # elif self.reward_shaping:
+
+        #     # reaching reward
+        #     cube_pos = self.sim.data.body_xpos[self.cube_body_id]
+        #     gripper_site_pos = self.sim.data.site_xpos[self.robots[0].eef_site_id]
+        #     dist = np.linalg.norm(gripper_site_pos - cube_pos)
+        #     #reaching_reward = 1 - np.tanh(10.0 * dist)
+        #     reaching_reward = -dist
+        #     reward += reaching_reward
+
+        #     # grasping reward
+        #     if self._check_grasp(gripper=self.robots[0].gripper, object_geoms=self.cube):
+        #         #reward += 0.25
+        #         reward += 1
+
+        # # Scale reward if requested
+        # if self.reward_scale is not None:
+        #     reward *= self.reward_scale / 2.25
+        # #print(reward)
+        # return reward
+    
         """
-        Reward function for the task.
-
-        Sparse un-normalized reward:
-
-            - a discrete reward of 2.25 is provided if the cube is lifted
-
-        Un-normalized summed components if using reward shaping:
-
-            - Reaching: in [0, 1], to encourage the arm to reach the cube
-            - Grasping: in {0, 0.25}, non-zero if arm is grasping the cube
-            - Lifting: in {0, 1}, non-zero if arm has lifted the cube
-
-        The sparse reward only consists of the lifting component.
-
-        Note that the final reward is normalized and scaled by
-        reward_scale / 2.25 as well so that the max score is equal to reward_scale
-
-        Args:
-            action (np array): [NOT USED]
-
-        Returns:
-            float: reward value
+        official original reward
         """
         reward = 0.0
 
         # sparse completion reward
         if self._check_success():
-            #reward = 2.25
-            reward = 3
-        elif self._check_terminated():
-            reward+=-200
+            reward = 2.25
 
         # use a shaping reward
         elif self.reward_shaping:
@@ -251,51 +282,19 @@ class Lift(SingleArmEnv):
             cube_pos = self.sim.data.body_xpos[self.cube_body_id]
             gripper_site_pos = self.sim.data.site_xpos[self.robots[0].eef_site_id]
             dist = np.linalg.norm(gripper_site_pos - cube_pos)
-            #reaching_reward = 1 - np.tanh(10.0 * dist)
-            reaching_reward = -dist
+            reaching_reward = 1 - np.tanh(10.0 * dist)
             reward += reaching_reward
 
             # grasping reward
             if self._check_grasp(gripper=self.robots[0].gripper, object_geoms=self.cube):
-                #reward += 0.25
-                reward += 1
+                reward += 0.25
 
         # Scale reward if requested
         if self.reward_scale is not None:
             reward *= self.reward_scale / 2.25
-        #print(reward)
+
         return reward
-    
 
-
-
-        # my rewards
-        # reward = 0.0
-
-        # sparse completion reward
-        # if self._check_success():
-        #     reward = 2.25
-
-        # use a shaping reward
-        # elif self.reward_shaping:
-
-        #     reaching reward
-        #     cube_pos = self.sim.data.body_xpos[self.cube_body_id]
-        #     gripper_site_pos = self.sim.data.site_xpos[self.robots[0].eef_site_id]
-        #     dist = np.linalg.norm(gripper_site_pos - cube_pos)
-        #     reaching_reward = 1 - np.tanh(10.0 * dist)
-        #     reward += reaching_reward
-
-        #     grasping reward
-        #     if self._check_grasp(gripper=self.robots[0].gripper, object_geoms=self.cube):
-        #         reward += 0.25
-
-        # Scale reward if requested
-        # if self.reward_scale is not None:
-        #     reward *= self.reward_scale / 2.25
-        # print(reward)
-        # return reward
-        # my rewards
 
 
 
