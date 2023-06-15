@@ -23,6 +23,7 @@ from robosuite.environments.manipulation.two_arm_handover import TwoArmHandover
 
 #customed environments
 from robosuite.environments.manipulation.reach import Reach
+from robosuite.environments.manipulation.insertion import Insertion
 
 from robosuite.environments import ALL_ENVIRONMENTS
 from robosuite.controllers import ALL_CONTROLLERS, load_controller_config

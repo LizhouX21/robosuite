@@ -11,7 +11,7 @@ from .jaco_three_finger_gripper import JacoThreeFingerGripper, JacoThreeFingerDe
 from .robotiq_140_gripper import Robotiq140Gripper
 from .wiping_gripper import WipingGripper
 from .null_gripper import NullGripper
-
+from .robotiq_85_gripper_Vshape import Robotiq85GripperVshape
 
 GRIPPER_MAPPING = {
     "RethinkGripper": RethinkGripper,
@@ -20,6 +20,7 @@ GRIPPER_MAPPING = {
     "JacoThreeFingerDexterousGripper": JacoThreeFingerDexterousGripper,
     "WipingGripper": WipingGripper,
     "Robotiq85Gripper": Robotiq85Gripper,
+    "Robotiq85GripperVshape": Robotiq85GripperVshape,
     "Robotiq140Gripper": Robotiq140Gripper,
     "RobotiqThreeFingerGripper": RobotiqThreeFingerGripper,
     "RobotiqThreeFingerDexterousGripper": RobotiqThreeFingerDexterousGripper,
